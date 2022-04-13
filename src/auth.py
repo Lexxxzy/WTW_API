@@ -1,16 +1,19 @@
 from datetime import timedelta
 import os
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, send_from_directory
 import werkzeug
 from werkzeug.security import check_password_hash, generate_password_hash
 import validators
 from src.constants.http_errors import *
 from src.database import User, db
 from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity, get_jwt
-
-from src.constants.http_status_codes import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_409_CONFLICT
+from src.constants.http_status_codes import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_408_REQUEST_TIMEOUT, HTTP_409_CONFLICT
+import uuid as uuid
 
 auth = Blueprint("auth", __name__, url_prefix="/api/v1/auth")
+
+MEDIA_FOLDER = os.path.join(os.path.dirname(os.path.dirname(
+    os.path.dirname(os.path.abspath(__file__)))), 'data')
 
 
 @auth.post('/register')
@@ -57,12 +60,10 @@ def login():
 
     if user:
         is_password_correct = check_password_hash(user.password, password)
-
         if is_password_correct:
             refresh = create_refresh_token(identity=user.id)
             access = create_access_token(identity=user.id)
             accesTokenExpiresIn = 90 * 24 * 60 * 60
-
             return jsonify({
                 'idToken': access,
                 'expiresIn': accesTokenExpiresIn,
@@ -84,7 +85,8 @@ def user():
     return jsonify({
         'username': user.username,
         'email': user.email,
-        'favourites': 0 if user.favourites is None else len(''.join(user.favourites).split(' ')),
+        'avatar': user.avatar_URL,
+        'favourites': 0 if user.favourites is None else len(''.join(user.favourites).split(' '))-1,
         'likes': 0 if user.likes is None else len(''.join(user.likes).replace(' ', '').split(',')),
         'dislikes': 0 if user.dislikes is None else len(''.join(user.dislikes).replace(' ', '').split(',')),
     }), HTTP_200_OK
@@ -102,15 +104,28 @@ def refresh_users_token():
 
 
 @auth.post("/setavatar")
-#@jwt_required()
+@jwt_required()
 def set_avatar():
-    # user_id = get_jwt_identity()
-    # user = User.query.filter_by(id=user_id).first()
+    user_id = get_jwt_identity()
+    user = User.query.filter_by(id=user_id).first()
 
     imagefile = request.files['image']
-    imagefile.save(os.path.join('src/files',werkzeug.utils.secure_filename(imagefile.filename)))
+    file_name = werkzeug.utils.secure_filename(imagefile.filename)
+    image_name = str(uuid.uuid1()) + '_' + file_name
+
+    if not imagefile:
+        return jsonify({'error': 'Bad upload!'}), HTTP_400_BAD_REQUEST
+
+    imagefile.save(os.path.join('src/files', image_name))
+
+    user.avatar_URL = image_name
+    db.session.commit()
+
     imagefile.close
 
-#user.avatar_URL = './files/avatars/' + filename
-
     return jsonify({}), HTTP_200_OK
+
+
+@auth.route('/files/<filename>', methods=['GET', 'POST'])
+def download_file(filename):
+    return send_from_directory('files', filename, as_attachment=True)

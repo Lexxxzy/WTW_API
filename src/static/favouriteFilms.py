@@ -15,4 +15,3 @@ class FavouriteFilm(Resource):
             return JsonOfAllFavouritefilms
         else:
             return 'Not found'
-        # return favourite.split(' ')

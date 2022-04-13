@@ -1,10 +1,7 @@
-from dataclasses import dataclass
+
 from datetime import datetime
-from flask import jsonify
 from flask_sqlalchemy import SQLAlchemy
-from typing import List
-from sqlalchemy import ForeignKey
-from sqlalchemy.orm import relationship
+
 
 db = SQLAlchemy()
 
@@ -14,7 +11,7 @@ class User(db.Model):
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.Text(), nullable=False)
-    avatar_URL = db.Column(db.Text())
+    avatar_URL = db.Column(db.String(), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.now())
     updated_at = db.Column(db.DateTime, onupdate=datetime.now())
     likes = db.Column(db.Text())
@@ -25,9 +22,7 @@ class User(db.Model):
         return 'User>>> {self.username}'
 
 
-@dataclass
 class ComingSoon(db.Model):
-
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     title = db.Column(db.Text())
     genre = db.Column(db.Text())
@@ -39,7 +34,6 @@ class ComingSoon(db.Model):
     ifSeries = db.Column(db.Text())
     age = db.Column(db.Integer)
     studio = db.Column(db.Text())
-
 
     def __repr__(self) -> str:
         return 'ComingSoon>>> {self.url}'

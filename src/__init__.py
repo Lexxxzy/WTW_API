@@ -17,6 +17,7 @@ def create_app(test_config=None):
             SQLALCHEMY_DATABASE_URI=os.environ.get("SQLALCKEMY_DB_URI"),
             SQLALCHEMY_TRACK_MODIFICATIONS=False,
             JWT_SECRET_KEY=os.environ.get("JWT_SECRET_KEY"),
+            MEDIA_FOLDER = os.environ.get("MEDIA_FOLDER"),
         )
     else:
         app.config.from_mapping(test_config)
