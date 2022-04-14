@@ -7,56 +7,56 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from .constants.http_status_codes import HTTP_200_OK, HTTP_204_NO_CONTENT
 from .static.favouriteFilms import FavouriteFilm
 
-favourites = Blueprint("favourites", __name__, url_prefix="/api/v1/favourites")
+likes = Blueprint("likes", __name__, url_prefix="/api/v1/likes")
 
 
-@favourites.get('/')
+@likes.get('/')
 @jwt_required()
-def get_favourites():
+def get_likes():
     current_user_id = get_jwt_identity()
     user = User.query.filter_by(id=current_user_id).first()
 
-    all_user_favourites = FavouriteFilm.get(user.favourites)
-    return {"favourites":
-            all_user_favourites,
+    all_user_likes = FavouriteFilm.get(user.likes)
+    return {"Likes":
+            all_user_likes,
             }, HTTP_200_OK
 
 
-@favourites.get('/is-favourite/<int:id>')
+@likes.get('/is-liked/<int:id>')
 @jwt_required()
-def is_favourite(id):
+def is_liked(id):
     current_user_id = get_jwt_identity()
     user = User.query.filter_by(id=current_user_id).first()
-    is_favourite = False
+    is_liked = False
 
-    if(user.favourites != None):
-       fav_list = user.favourites.split(' ')
-       is_favourite = f'{id}' in fav_list
+    if(user.likes != None):
+       fav_list = user.likes.split(' ')
+       is_liked = f'{id}' in fav_list
 
-    return {"isFavourite":
-            is_favourite,
+    return {"isLiked":
+            is_liked,
             }, HTTP_200_OK
 
 
-@favourites.put('/<int:id>')
-@favourites.patch('/<int:id>')
+@likes.put('/<int:id>')
+@likes.patch('/<int:id>')
 @jwt_required()
-def handle_favourites(id):
+def handle_likes(id):
     current_user_id = get_jwt_identity()
     user = User.query.filter_by(id=current_user_id).first()
 
-    if(user.favourites == None):
-        user.favourites = f'{id} '
+    if(user.likes == None):
+        user.likes = f'{id} '
         db.session.commit()
         return jsonify({}), HTTP_204_NO_CONTENT
 
-    fav_list = user.favourites.split(' ')
+    likes_list = user.likes.split(' ')
 
-    if(f'{id}' in fav_list):
-        fav_list.remove(f'{id}')
-        user.favourites = None if len(fav_list)<2 else " ".join(fav_list)
+    if(f'{id}' in likes_list):
+        likes_list.remove(f'{id}')
+        user.likes = None if len(likes_list)<2 else " ".join(likes_list)
     else:
-        user.favourites += f'{id} '
+        user.likes += f'{id} '
 
     db.session.commit()
 

@@ -2,7 +2,10 @@ class SearchParse:
 
     @staticmethod
     def returnJson(getall, getimages, getseasons, getdistr):
-
+        if getall.get('ratingAgeLimits') is None:
+            age = None
+        else:
+            age = int(getall.get('ratingAgeLimits').replace('age', ''))
         resultJsonFile = {
             'id': getall.get('kinopoiskId'),
             'title': [getall.get('nameRu'), getall.get('nameOriginal')],
@@ -17,7 +20,7 @@ class SearchParse:
             'ifSeries': getall.get('serial'),
             'seasons': getseasons.get('total'),
             'dateTo': getall.get('endYear'),
-            'age': int(getall.get('ratingAgeLimits').replace('age', '')),
+            'age': age,
             'studio': list(set(map(lambda x: x[0]['name'], filter(None, (map(lambda x: x.get('companies'), getdistr.get('items')))))))
         }
         return resultJsonFile

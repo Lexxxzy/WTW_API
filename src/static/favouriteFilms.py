@@ -4,7 +4,6 @@ from .idsearch import SearchById
 
 
 class FavouriteFilm(Resource):
-
     def get(favourite):
         if(favourite): 
             fav = favourite.split(' ')
@@ -14,4 +13,4 @@ class FavouriteFilm(Resource):
                     JsonOfAllFavouritefilms.append(SearchById.get(x))
             return JsonOfAllFavouritefilms
         else:
-            return 'Not found'
+            return [{'error' : 'Not found'}]

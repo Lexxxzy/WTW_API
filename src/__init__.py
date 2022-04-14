@@ -6,6 +6,7 @@ from src.trending import trending
 from src.database import db
 from flask_jwt_extended import JWTManager
 from src.favourites import favourites
+from src.likes import likes
 
 
 def create_app(test_config=None):
@@ -32,5 +33,6 @@ def create_app(test_config=None):
     app.register_blueprint(auth)
     app.register_blueprint(favourites)
     app.register_blueprint(trending)
+    app.register_blueprint(likes)
 
     return app

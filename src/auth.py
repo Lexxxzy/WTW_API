@@ -116,8 +116,13 @@ def set_avatar():
     if not imagefile:
         return jsonify({'error': 'Bad upload!'}), HTTP_400_BAD_REQUEST
 
+    #save new avatar
     imagefile.save(os.path.join('src/files', image_name))
 
+    #delete previous avatar
+    os.remove(os.path.join('src/files/', f'{user.avatar_URL}'))
+
+    #set and commit new avatar url to database
     user.avatar_URL = image_name
     db.session.commit()
 
