@@ -29,6 +29,8 @@ def get_favourites():
             'country':  list(movie.country.split(',')),
             'ifSeries': movie.ifSeries,
             'age': movie.age,
+            'ratingKinopoisk' : float(movie.ratingKinopoisk) if movie.ratingKinopoisk!=None else movie.ratingKinopoisk,
+            'ratingIMDb' : float(movie.ratingIMDb) if movie.ratingIMDb!=None else movie.ratingIMDb,
         })
 
     

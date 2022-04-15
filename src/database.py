@@ -26,14 +26,18 @@ class ComingSoon(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     title = db.Column(db.Text())
     genre = db.Column(db.Text())
+    ratingKinopoisk = db.Column(db.Text())
+    ratingIMDb = db.Column(db.Text())
     date = db.Column(db.Integer)
     description = db.Column(db.Text())
     poster = db.Column(db.Text())
     frames = db.Column(db.Text())
     country = db.Column(db.Text())
     ifSeries = db.Column(db.Text())
+    seasons = db.Column(db.Integer)
+    dateTo = db.Column(db.Integer)
     age = db.Column(db.Integer)
-    studio = db.Column(db.Text())
+    tags = db.Column(db.Text())
 
     def __repr__(self) -> str:
         return 'ComingSoon>>> {self.url}'
