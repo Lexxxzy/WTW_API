@@ -2,10 +2,12 @@ from datetime import timedelta
 from flask import Flask
 import os
 from src.auth import auth
-from src.trending import trending
+from src.suggestions import suggestions
 from src.database import db
 from flask_jwt_extended import JWTManager
 from src.favourites import favourites
+from src.topfilms import top_films
+from src.search import search
 from src.likes import likes
 
 
@@ -32,7 +34,9 @@ def create_app(test_config=None):
 
     app.register_blueprint(auth)
     app.register_blueprint(favourites)
-    app.register_blueprint(trending)
+    app.register_blueprint(suggestions)
     app.register_blueprint(likes)
+    app.register_blueprint(top_films)
+    app.register_blueprint(search)
 
     return app
