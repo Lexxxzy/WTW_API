@@ -1,20 +1,31 @@
-from datetime import timedelta
-from random import randint
-from flask import Flask, render_template, request
-from flask_mail import Mail
 import os
-from src.auth import auth
 from src.suggestions import suggestions
-from src.database import User, db
 from flask_jwt_extended import JWTManager
 from src.favourites import favourites
-from src.topfilms import top_films
+from datetime import timedelta
 from src.search import search
 from src.likes import likes
-from random import randint
-from flask import Blueprint, Flask, jsonify, request
-from flask_mail import Mail, Message
-from src.constants.http_status_codes import HTTP_200_OK, HTTP_400_BAD_REQUEST
+from flask_mail import Mail
+from src.auth import auth
+from flask import (
+    Flask,
+    render_template,
+    request,
+    Blueprint,
+    jsonify,
+)
+from flask_mail import (
+    Mail,
+    Message
+)
+from src.constants.http_status_codes import (
+    HTTP_200_OK,
+    HTTP_400_BAD_REQUEST
+)
+from src.database import (
+    User, 
+    db
+)
 
 
 
@@ -45,15 +56,12 @@ def create_app(test_config=None):
     app.register_blueprint(favourites)
     app.register_blueprint(suggestions)
     app.register_blueprint(likes)
-    app.register_blueprint(top_films)
     app.register_blueprint(search)
     
-
     verification = Blueprint("verification", __name__, url_prefix="/api/v1/verification")
 
     mail=Mail(app)
     
-
     @verification.post('/verify')
     def verify():
         

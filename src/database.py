@@ -2,6 +2,9 @@
 from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
 
+""" 
+    Модели используемные API для связи с БД
+""" 
 
 db = SQLAlchemy()
 

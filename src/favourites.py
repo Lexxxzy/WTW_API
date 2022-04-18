@@ -1,11 +1,20 @@
 from flask import Blueprint
 from flask import Blueprint, jsonify
-from requests import request
 from src.constants.http_errors import *
 from src.database import User, db
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from .constants.http_status_codes import HTTP_200_OK, HTTP_204_NO_CONTENT
 from .static.favouriteFilms import FavouriteFilm
+
+""" 
+    Endpoint /api/v1/favourites/... используется для получения
+    информации о любимых фильмах и сериалах, а также ее добавления
+    для конкретного юзера
+
+    - / получение json с информацией о фильмах
+    - /is-favourite/<int:id> проверка на то является ли фильм любимым
+    - /<int:id> добавление фильма в любимые
+"""
 
 favourites = Blueprint("favourites", __name__, url_prefix="/api/v1/favourites")
 
@@ -30,8 +39,8 @@ def is_favourite(id):
     is_favourite = False
 
     if(user.favourites != None):
-       fav_list = user.favourites.split(' ')
-       is_favourite = f'{id}' in fav_list
+        fav_list = user.favourites.split(' ')
+        is_favourite = f'{id}' in fav_list
 
     return {"isFavourite":
             is_favourite,
@@ -54,7 +63,7 @@ def handle_favourites(id):
 
     if(f'{id}' in fav_list):
         fav_list.remove(f'{id}')
-        user.favourites = None if len(fav_list)<2 else " ".join(fav_list)
+        user.favourites = None if len(fav_list) < 2 else " ".join(fav_list)
     else:
         user.favourites += f'{id} '
 

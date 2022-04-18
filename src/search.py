@@ -4,6 +4,11 @@ from src.constants.http_errors import *
 from .constants.http_status_codes import HTTP_200_OK
 from .static.namesearch import SearchByName
 
+"""
+    Endpoint /api/v1/search... 
+    используется для получения информации о фильме по ключевым словам
+"""
+
 search = Blueprint("search", __name__, url_prefix="/api/v1/search")
 
 

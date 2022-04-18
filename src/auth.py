@@ -1,15 +1,44 @@
-from datetime import timedelta
 import os
+import re
+import uuid as uuid
 from random import randint
-from flask import Blueprint, request, jsonify, send_from_directory
 import werkzeug
-from werkzeug.security import check_password_hash, generate_password_hash
 import validators
 from src.constants.http_errors import *
 from src.database import User, db
-from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity, get_jwt
-from src.constants.http_status_codes import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_408_REQUEST_TIMEOUT, HTTP_409_CONFLICT
-import uuid as uuid
+from flask import (
+    Blueprint,
+    request,
+    jsonify,
+    send_from_directory
+)
+from werkzeug.security import (
+    check_password_hash,
+    generate_password_hash
+)
+from flask_jwt_extended import (
+    create_access_token,
+    create_refresh_token,
+    jwt_required,
+    get_jwt_identity
+)
+from src.constants.http_status_codes import (
+    HTTP_200_OK,
+    HTTP_201_CREATED,
+    HTTP_400_BAD_REQUEST,
+    HTTP_409_CONFLICT
+)
+
+
+"""
+    Endpoint /api/v1/auth/... 
+    используется для взаимодействия с пользователем, а именно:
+    - регистрации /register
+    - авторизации /login
+    - получения краткой информации /user
+    - получения и проверки токена JWT /login, /token/refresh
+    - редактирования профиля /setavatar
+"""
 
 auth = Blueprint("auth", __name__, url_prefix="/api/v1/auth")
 
@@ -40,7 +69,8 @@ def register():
 
     pwd_hash = generate_password_hash(password)
 
-    user = User(username=username, password=pwd_hash, email=email, isAcivated='false', code=randint(1000,9999))
+    user = User(username=username, password=pwd_hash, email=email,
+                isAcivated='false', code=randint(1000, 9999))
     db.session.add(user)
     db.session.commit()
 
@@ -58,7 +88,7 @@ def login():
     password = request.json.get('password', '')
 
     user = User.query.filter_by(email=email).first()
-    
+
     if user:
         is_password_correct = check_password_hash(user.password, password)
         if user.isAcivated == 'true':
@@ -80,7 +110,6 @@ def login():
         return jsonify({'error': SIGN_IN_EMAIL}), HTTP_200_OK
 
 
-
 @auth.get("/user")
 @jwt_required()
 def user():
@@ -88,6 +117,7 @@ def user():
     user = User.query.filter_by(id=user_id).first()
     return jsonify({
         'username': user.username,
+        'realname': user.realname,
         'email': user.email,
         'avatar': user.avatar_URL,
         'favourites': 0 if user.favourites is None else len(''.join(user.favourites).split(' '))-1,
@@ -107,7 +137,42 @@ def refresh_users_token():
     }), HTTP_200_OK
 
 
-@auth.post("/setavatar")
+@auth.post('/update')
+@jwt_required()
+def update_user_info():
+    user_id = get_jwt_identity()
+    user = User.query.filter_by(id=user_id).first()
+
+    realname = request.json.get('realname', '')
+    nickname = request.json.get('nickname', '')
+
+    if(realname):
+        realname.replace(
+            "‘", '').replace("’", '').replace("'", '').replace(u"\u2019", "")
+
+        if(re.match("^[a-z A-Z]*$", realname)):
+            user.realname = realname
+            db.session.commit()
+        else:
+            return jsonify({'error': 'Name can contain only letters'}), HTTP_200_OK
+
+    if User.query.filter_by(username=nickname).first() is not None:
+        return jsonify({'error': SIGN_UP_USERNAME_EXISTS}), HTTP_409_CONFLICT
+        
+    if(nickname):
+        nickname.replace(
+            "‘", '').replace("’", '').replace("'", '').replace(u"\u2019", "")
+
+        if(nickname.isalnum()):
+            user.username = nickname
+            db.session.commit()
+        else:
+            return jsonify({'error': 'Nickname can contain only letters and numbers'}), HTTP_200_OK
+
+    return jsonify({}), HTTP_200_OK
+
+
+@auth.post('/setavatar')
 @jwt_required()
 def set_avatar():
     user_id = get_jwt_identity()
@@ -118,16 +183,16 @@ def set_avatar():
     image_name = str(uuid.uuid1()) + '_' + file_name
 
     if not imagefile:
-        return jsonify({'error': 'Bad upload!'}), HTTP_400_BAD_REQUEST
+        return jsonify({'error': 'Bad upload!'}), HTTP_200_OK
 
-    #save new avatar
+    # save new avatar
     imagefile.save(os.path.join('src/files', image_name))
 
-    #delete previous avatar
+    # delete previous avatar
     if user.avatar_URL:
         os.remove(os.path.join('src/files/', f'{user.avatar_URL}'))
 
-    #set and commit new avatar url to database
+    # set and commit new avatar url to database
     user.avatar_URL = image_name
     db.session.commit()
 
