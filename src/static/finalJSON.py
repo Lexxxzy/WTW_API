@@ -23,6 +23,8 @@ def get_final_json(key_word):
                 'age': movie.age,
                 'ratingKinopoisk' : float(movie.ratingKinopoisk) if movie.ratingKinopoisk!=None else movie.ratingKinopoisk,
                 'ratingIMDb' : float(movie.ratingIMDb) if movie.ratingIMDb!=None else movie.ratingIMDb,
+                'seasons' : int(movie.seasons) if movie.seasons!=None else movie.seasons,
+                'dateTo' : movie.dateTo,
             })
 
     

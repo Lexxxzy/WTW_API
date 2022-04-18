@@ -1,5 +1,6 @@
 from datetime import timedelta
 import os
+from random import randint
 from flask import Blueprint, request, jsonify, send_from_directory
 import werkzeug
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -39,7 +40,7 @@ def register():
 
     pwd_hash = generate_password_hash(password)
 
-    user = User(username=username, password=pwd_hash, email=email)
+    user = User(username=username, password=pwd_hash, email=email, isAcivated='false', code=randint(1000,9999))
     db.session.add(user)
     db.session.commit()
 
@@ -57,24 +58,27 @@ def login():
     password = request.json.get('password', '')
 
     user = User.query.filter_by(email=email).first()
-
+    
     if user:
         is_password_correct = check_password_hash(user.password, password)
-        if is_password_correct:
-            refresh = create_refresh_token(identity=user.id)
-            access = create_access_token(identity=user.id)
-            accesTokenExpiresIn = 90 * 24 * 60 * 60
-            return jsonify({
-                'idToken': access,
-                'expiresIn': accesTokenExpiresIn,
-                'username': user.username,
-                'email': user.email
-            }), HTTP_200_OK
+        if user.isAcivated == 'true':
+            if is_password_correct:
+                refresh = create_refresh_token(identity=user.id)
+                access = create_access_token(identity=user.id)
+                accesTokenExpiresIn = 90 * 24 * 60 * 60
+                return jsonify({
+                    'idToken': access,
+                    'expiresIn': accesTokenExpiresIn,
+                    'username': user.username,
+                    'email': user.email
+                }), HTTP_200_OK
+            else:
+                return jsonify({'error': SIGN_IN_PASSWORD}), HTTP_200_OK
         else:
-            return jsonify({'error': SIGN_IN_PASSWORD}), HTTP_200_OK
-
+            return jsonify({'error': 'You account is not activated!'}), HTTP_200_OK
     else:
         return jsonify({'error': SIGN_IN_EMAIL}), HTTP_200_OK
+
 
 
 @auth.get("/user")
@@ -120,7 +124,8 @@ def set_avatar():
     imagefile.save(os.path.join('src/files', image_name))
 
     #delete previous avatar
-    os.remove(os.path.join('src/files/', f'{user.avatar_URL}'))
+    if user.avatar_URL:
+        os.remove(os.path.join('src/files/', f'{user.avatar_URL}'))
 
     #set and commit new avatar url to database
     user.avatar_URL = image_name

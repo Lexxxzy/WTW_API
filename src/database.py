@@ -11,12 +11,14 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.Text(), nullable=False)
     realname = db.Column(db.String(80), nullable=True)
-    avatar_URL = db.Column(db.String(), nullable=True)
+    avatar_URL = db.Column(db.Text(), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.now())
     updated_at = db.Column(db.DateTime, onupdate=datetime.now())
     likes = db.Column(db.Text())
     dislikes = db.Column(db.Text())
     favourites = db.Column(db.Text())
+    isAcivated = db.Column(db.Text())
+    code = db.Column(db.Integer)
 
     def __repr__(self) -> str:
         return 'User>>> {self.username}'

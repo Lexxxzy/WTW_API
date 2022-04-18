@@ -1,14 +1,21 @@
 from datetime import timedelta
-from flask import Flask
+from random import randint
+from flask import Flask, render_template, request
+from flask_mail import Mail
 import os
 from src.auth import auth
 from src.suggestions import suggestions
-from src.database import db
+from src.database import User, db
 from flask_jwt_extended import JWTManager
 from src.favourites import favourites
 from src.topfilms import top_films
 from src.search import search
 from src.likes import likes
+from random import randint
+from flask import Blueprint, Flask, jsonify, request
+from flask_mail import Mail, Message
+from src.constants.http_status_codes import HTTP_200_OK, HTTP_400_BAD_REQUEST
+
 
 
 def create_app(test_config=None):
@@ -26,6 +33,8 @@ def create_app(test_config=None):
         app.config.from_mapping(test_config)
 
     app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(days=90)
+    
+    app.config.from_pyfile('mailconfig.cfg')
 
     db.app = app
     db.init_app(app)
@@ -38,5 +47,36 @@ def create_app(test_config=None):
     app.register_blueprint(likes)
     app.register_blueprint(top_films)
     app.register_blueprint(search)
+    
+
+    verification = Blueprint("verification", __name__, url_prefix="/api/v1/verification")
+
+    mail=Mail(app)
+    
+
+    @verification.post('/verify')
+    def verify():
+        
+        email=request.json.get('email', '')
+        user = User.query.filter_by(email=email).first()
+        msg=Message(subject='What to watch',sender='wtw.validate@gmail.com',recipients=[email])
+        msg.html = render_template('email.html', otp = str(user.code), email = email)
+        mail.send(msg)
+        return jsonify({}), HTTP_200_OK
+
+    @verification.post('/validate')
+    def validate():
+        email=request.json.get('email', '')
+        otp=request.json.get('code', '')
+        user = User.query.filter_by(email=email).first()
+        if user.code==int(otp):
+            user.code = None
+            user.isAcivated = 'true'
+            db.session.commit()
+            return {'success' : '200'}, HTTP_200_OK
+        return  {'error' : 'Wrong code!'}, HTTP_400_BAD_REQUEST
+
+    app.register_blueprint(verification)
 
     return app
+
