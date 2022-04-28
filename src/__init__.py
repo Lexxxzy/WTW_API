@@ -3,6 +3,7 @@ from src.suggestions import suggestions
 from flask_jwt_extended import JWTManager
 from src.favourites import favourites
 from datetime import timedelta
+from src.recomendations import recomendations
 from src.search import search
 from src.likes import likes
 from flask_mail import Mail
@@ -57,6 +58,7 @@ def create_app(test_config=None):
     app.register_blueprint(suggestions)
     app.register_blueprint(likes)
     app.register_blueprint(search)
+    app.register_blueprint(recomendations)
     
     verification = Blueprint("verification", __name__, url_prefix="/api/v1/verification")
 

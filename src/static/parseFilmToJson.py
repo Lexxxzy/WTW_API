@@ -1,3 +1,6 @@
+import requests
+
+
 class SearchParse:
 
     @staticmethod
@@ -21,6 +24,9 @@ class SearchParse:
             'seasons': getseasons.get('total'),
             'dateTo': getall.get('endYear'),
             'age': age,
-            'studio': list(set(map(lambda x: x[0]['name'], filter(None, (map(lambda x: x.get('companies'), getdistr.get('items')))))))
+            'studio': list(set(map(lambda x: x[0]['name'], filter(None, (map(lambda x: x.get('companies'), getdistr.get('items'))))))),
+            'video': '',
         }
         return resultJsonFile
+
+

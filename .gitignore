@@ -1,2 +1,6 @@
 .flaskenv
-src/files/ 
+src/files/
+src/static/matrix.csv
+src/static/matrix.csv
+matrix.csv
+*.csv
