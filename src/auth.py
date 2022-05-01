@@ -121,8 +121,8 @@ def user():
         'email': user.email,
         'avatar': user.avatar_URL,
         'favourites': 0 if user.favourites is None else len(''.join(user.favourites).split(' '))-1,
-        'likes': 0 if user.likes is None else len(''.join(user.likes).replace(' ', '').split(',')),
-        'dislikes': 0 if user.dislikes is None else len(''.join(user.dislikes).replace(' ', '').split(',')),
+        'likes': 0 if user.likes is None else len(''.join(user.likes).split(' '))-1,
+        'dislikes': 0 if user.dislikes is None else len(''.join(user.dislikes).split(' '))-1,
     }), HTTP_200_OK
 
 

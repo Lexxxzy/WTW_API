@@ -61,3 +61,27 @@ def handle_likes(id):
     db.session.commit()
 
     return jsonify({}), HTTP_204_NO_CONTENT
+
+@likes.put('/dislikes/<int:id>')
+@likes.patch('/dislikes/<int:id>')
+@jwt_required()
+def handle_dislikes(id):
+    current_user_id = get_jwt_identity()
+    user = User.query.filter_by(id=current_user_id).first()
+
+    if(user.dislikes == None):
+        user.dislikes = f'{id} '
+        db.session.commit()
+        return jsonify({}), HTTP_204_NO_CONTENT
+
+    dislikes_list = user.dislikes.split(' ')
+
+    if(f'{id}' in dislikes_list):
+        dislikes_list.remove(f'{id}')
+        user.dislikes = None if len(dislikes_list)<2 else " ".join(dislikes_list)
+    else:
+        user.dislikes += f'{id} '
+
+    db.session.commit()
+
+    return jsonify({}), HTTP_204_NO_CONTENT

@@ -22,6 +22,7 @@ class User(db.Model):
     favourites = db.Column(db.Text())
     isAcivated = db.Column(db.Text())
     code = db.Column(db.Integer)
+    recomendations = db.Column(db.Text())
 
     def __repr__(self) -> str:
         return 'User>>> {self.username}'

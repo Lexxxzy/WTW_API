@@ -4,7 +4,7 @@ import requests
 class SearchParse:
 
     @staticmethod
-    def returnJson(getall, getimages, getseasons, getdistr):
+    def returnJson(getall, getimages, getseasons, getdistr,recsId=None,film_name_recs=''):
         if getall.get('ratingAgeLimits') is None:
             age = None
         else:
@@ -26,6 +26,8 @@ class SearchParse:
             'age': age,
             'studio': list(set(map(lambda x: x[0]['name'], filter(None, (map(lambda x: x.get('companies'), getdistr.get('items'))))))),
             'video': '',
+            'recsID': recsId,
+            'filmNameDB': film_name_recs
         }
         return resultJsonFile
 
